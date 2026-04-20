@@ -17,7 +17,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Options
 # -------------------------------
 option(ENABLE_TESTS "Build tests" ON)
-option(ENABLE_BENCHMARKS "Build benchmarks" OFF)
+option(ENABLE_BENCHMARKS "Build benchmarks" ON)
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer" OFF)
 

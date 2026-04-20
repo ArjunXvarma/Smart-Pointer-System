@@ -31,7 +31,7 @@ namespace sp {
 
         // Move assignment operator
         unique_ptr& operator=(unique_ptr&& other) noexcept {
-            if (other != this) {
+            if (this != &other) {
                 reset();
                 ptr = other.ptr;
                 other.ptr = nullptr;
@@ -74,7 +74,7 @@ namespace sp {
             return static_cast<const Deleter&>(*this);
         }
 
-        ~unique_ptr() {
+        ~unique_ptr() noexcept {
             if (ptr) {
                 get_deleter()(ptr);
             }
