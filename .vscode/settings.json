@@ -19,6 +19,7 @@
         "stdexcept": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "memory": "cpp"
+        "memory": "cpp",
+        "iostream": "cpp"
     }
 }

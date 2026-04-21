@@ -74,6 +74,10 @@ if (ENABLE_TESTS)
         tests/test_unique_ptr.cpp
     )
 
+    add_executable(test_shared_ptr
+        tests/test_shared_ptr.cpp
+    )
+
     target_link_libraries(test_unique_ptr PRIVATE smart_ptr)
 
     add_test(NAME unique_ptr_tests COMMAND test_unique_ptr)
