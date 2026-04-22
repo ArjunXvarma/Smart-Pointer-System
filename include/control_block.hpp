@@ -61,7 +61,7 @@ struct inplace_control_block : control_block_base {
     alignas(T) unsigned char storage[sizeof(T)];
 
     template<typename... Args>
-    inplace_control_block(Args&... args) {
+    inplace_control_block(Args&&... args) {
         new (storage) T(std::forward<Args>(args)...); // Allocate object T inside storage
     }
 

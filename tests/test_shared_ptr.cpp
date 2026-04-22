@@ -4,7 +4,7 @@
 #include <thread>
 #include <vector>
 
-#include "../include/shared_ptr.hpp"
+#include "../include/make_shared.hpp"
 #include "utils.hpp"
 
 using namespace sp;
@@ -177,6 +177,33 @@ void test_thread_safety() {
     assert(p.use_count() == 1);
 }
 
+void test_make_shared_basic() {
+    auto sp = sp::make_shared<int>(42);
+
+    assert(sp.get() != nullptr);
+    assert(*sp == 42);
+    assert(sp.use_count() == 1);
+}
+
+void test_make_shared_copy() {
+    auto sp1 = sp::make_shared<int>(42);
+    auto sp2 = sp1;
+
+    assert(sp1.use_count() == 2);
+    assert(sp2.use_count() == 2);
+}
+
+void test_make_shared_destruction() {
+    
+    Counter::destructions = 0;
+
+    {
+        auto sp = sp::make_shared<Counter>();
+    }
+
+    assert(Counter::destructions == 1);
+}
+
 int main() {
     RUN_TEST(test_control_block);
     RUN_TEST(test_basic);
@@ -193,6 +220,9 @@ int main() {
     RUN_TEST(test_null_behaviour);
     RUN_TEST(test_scope_stress);
     RUN_TEST(test_thread_safety);
+    RUN_TEST(test_make_shared_basic);
+    RUN_TEST(test_make_shared_copy);
+    RUN_TEST(test_make_shared_destruction);
 
     std::cout << "All shared_ptr tests passed\n";
 

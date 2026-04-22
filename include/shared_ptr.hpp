@@ -14,6 +14,9 @@ namespace sp {
         template<typename>
         friend class weak_ptr;
 
+        template<typename U, typename... Args>
+        friend shared_ptr<U> make_shared(Args&&...);
+
     public:
         shared_ptr() noexcept = default;
 

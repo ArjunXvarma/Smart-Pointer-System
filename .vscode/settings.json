@@ -21,6 +21,21 @@
         "variant": "cpp",
         "memory": "cpp",
         "iostream": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "__config": "cpp",
+        "__hash_table": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "format": "cpp",
+        "functional": "cpp",
+        "istream": "cpp",
+        "locale": "cpp",
+        "mutex": "cpp",
+        "print": "cpp",
+        "string": "cpp",
+        "tuple": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "complex": "cpp"
     }
 }

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "utils.hpp"
-#include "../include/shared_ptr.hpp"
+#include "../include/make_shared.hpp"
 
 #define benchmark benchmark_multi_thread
 
@@ -117,12 +117,20 @@ void bench_custom_threaded() {
     for (auto& th : threads) th.join();
 }
 
+void bench_make_shared() {
+    for (int i = 0; i < N; ++i) {
+        auto p = sp::make_shared<int>(i);
+        sink += *p;
+    }
+}
+
 int main() {
     std::cout << "=== shared_ptr Benchmark ===\n\n";
 
     std::cout << "--- Allocation ---\n";
     benchmark("std::shared_ptr alloc", bench_std_alloc, N);
     benchmark("custom shared_ptr alloc", bench_custom_alloc, N);
+    benchmark("custom make_shared shared_ptr alloc", bench_make_shared, 1);
 
     std::cout << "\n--- Copy (atomic inc/dec) ---\n";
     benchmark("std::shared_ptr copy", bench_std_copy, N);
