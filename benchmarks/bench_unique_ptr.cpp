@@ -2,20 +2,9 @@
 #include <memory>
 #include <chrono>
 #include "../include/unique_ptr.hpp"
-
-using Clock = std::chrono::high_resolution_clock;
+#include "utils.hpp"
 
 volatile int sink = 0;
-
-template<typename Func>
-void benchmark(const std::string& name, Func&& func) {
-    auto start = Clock::now();
-    func();
-    auto end = Clock::now();
-
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    std::cout << name << ": " << duration << " us\n";
-}
 
 constexpr int N = 1'000'000;
 
