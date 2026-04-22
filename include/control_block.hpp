@@ -6,34 +6,36 @@
 #define CONTROL_BLOCK_HPP
 
 #include <cstddef>
+#include <atomic>
 
 struct control_block_base {
-    size_t strong_count = 1;
-    size_t weak_count = 0;
+    std::atomic<size_t> strong_count = 1;
+    std::atomic<size_t> weak_count = 0;
 
     virtual void destroy_object() noexcept = 0;
     virtual void delete_self() noexcept = 0;
 
     virtual ~control_block_base() = default;
 
-    void add_strong() {
-        ++strong_count;
+    void add_strong() noexcept {
+        strong_count.fetch_add(1, std::memory_order_relaxed);
     }
 
-    void release_strong() {
-        if (--strong_count == 0) {
+    void release_strong() noexcept {
+        if (strong_count.fetch_sub(1, std::memory_order_acq_rel) == 1) {
             destroy_object();
-
-            if (weak_count == 0) delete_self();
+            if (weak_count.load(std::memory_order_acquire) == 0) delete_self();
         }
     }
 
-    void add_weak() {
-        ++weak_count;
+    void add_weak() noexcept {
+        weak_count.fetch_add(1, std::memory_order_relaxed);
     }
 
-    void release_weak() {
-        if (--weak_count == 0 && strong_count == 0) delete_self();
+    void release_weak() noexcept {
+        if (weak_count.fetch_sub(1, std::memory_order_acq_rel) == 1) {
+            if (strong_count.load(std::memory_order_acquire) == 0) delete_self();
+        }
     }
 };
 

@@ -1,6 +1,9 @@
 #include <iostream>
 #include <memory>
 #include <cassert>
+#include <thread>
+#include <vector>
+
 #include "../include/shared_ptr.hpp"
 #include "utils.hpp"
 
@@ -151,6 +154,29 @@ void test_scope_stress() {
     assert(Counter::destructions == 1);
 }
 
+void test_thread_safety() {
+    shared_ptr<int> p(new int(42));
+
+    const int n_threads = 8;
+    const int iterations = 100000;
+
+    std::vector<std::thread> threads;
+
+    for (int t = 0; t < n_threads; t++) {
+        threads.emplace_back([p]() mutable {
+            for (int i = 0; i < iterations; i++) {
+                shared_ptr<int> local = p;
+            }
+        });
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+
+    assert(p.use_count() == 1);
+}
+
 int main() {
     RUN_TEST(test_control_block);
     RUN_TEST(test_basic);
@@ -166,6 +192,7 @@ int main() {
     RUN_TEST(test_reassignment_release);
     RUN_TEST(test_null_behaviour);
     RUN_TEST(test_scope_stress);
+    RUN_TEST(test_thread_safety);
 
     std::cout << "All shared_ptr tests passed\n";
 

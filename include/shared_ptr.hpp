@@ -24,7 +24,7 @@ namespace sp {
             ptr = other.ptr;
             cb = other.cb;
 
-            if (cb) cb->strong_count++;
+            if (cb) cb->add_strong();
         }
 
         shared_ptr& operator=(const shared_ptr& other) {
@@ -33,7 +33,7 @@ namespace sp {
                 ptr = other.ptr;
                 cb = other.cb;
 
-                if (cb) cb->strong_count++;
+                if (cb) cb->add_strong();
             }
 
             return *this;
@@ -63,13 +63,7 @@ namespace sp {
         void release() {
             if (!cb) return;
 
-            cb->strong_count--;
-
-            if (cb->strong_count == 0) {
-                cb->destroy_object();
-
-                if (cb->weak_count == 0) cb->delete_self();
-            }
+            cb->release_strong();
 
             ptr = nullptr;
             cb = nullptr;
@@ -88,7 +82,7 @@ namespace sp {
         }
 
         size_t use_count() const noexcept {
-            return cb ? cb->strong_count : 0;
+            return cb ? cb->strong_count.load(std::memory_order_acquire) : 0;
         }
 
         void reset() {
