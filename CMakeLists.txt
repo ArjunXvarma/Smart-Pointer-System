@@ -108,4 +108,10 @@ if (ENABLE_BENCHMARKS)
     )
 
     target_link_libraries(bench_shared_ptr PRIVATE smart_ptr)
+
+    add_executable(bench_weak_ptr
+        benchmarks/bench_weak_ptr.cpp
+    )
+
+    target_link_libraries(bench_weak_ptr PRIVATE smart_ptr)
 endif()
