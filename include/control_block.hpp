@@ -7,6 +7,7 @@
 
 #include <cstddef>
 #include <atomic>
+#include <utility>
 
 struct control_block_base {
     std::atomic<size_t> strong_count = 1;

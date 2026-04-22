@@ -74,13 +74,23 @@ if (ENABLE_TESTS)
         tests/test_unique_ptr.cpp
     )
 
+    target_link_libraries(test_unique_ptr PRIVATE smart_ptr)
+
     add_executable(test_shared_ptr
         tests/test_shared_ptr.cpp
     )
 
-    target_link_libraries(test_unique_ptr PRIVATE smart_ptr)
+    target_link_libraries(test_shared_ptr PRIVATE smart_ptr)
+
+    add_executable(test_weak_ptr
+        tests/test_weak_ptr.cpp
+    )
+
+    target_link_libraries(test_weak_ptr PRIVATE smart_ptr)
 
     add_test(NAME unique_ptr_tests COMMAND test_unique_ptr)
+    add_test(NAME shared_ptr_tests COMMAND test_shared_ptr)
+    add_test(NAME weak_ptr_tests COMMAND test_weak_ptr)
 endif()
 
 # -------------------------------

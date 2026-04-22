@@ -20,6 +20,7 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "memory": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "utility": "cpp"
     }
 }

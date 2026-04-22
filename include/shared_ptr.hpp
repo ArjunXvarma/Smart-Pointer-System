@@ -11,6 +11,9 @@ namespace sp {
         T* ptr = nullptr;
         control_block_base* cb = nullptr;
 
+        template<typename>
+        friend class weak_ptr;
+
     public:
         shared_ptr() noexcept = default;
 
@@ -94,6 +97,10 @@ namespace sp {
             release();
             cb = new separate_control_block<T, Deleter>(p, std::move(d));
             ptr = p;
+        }
+
+        explicit operator bool() const noexcept {
+            return ptr != nullptr;
         }
 
         ~shared_ptr() {
