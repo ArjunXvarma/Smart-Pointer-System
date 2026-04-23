@@ -6,6 +6,7 @@
 
 #include "utils.hpp"
 #include "../include/make_shared.hpp"
+#include "../include/allocate_shared.hpp"
 
 #define benchmark benchmark_multi_thread
 
@@ -124,13 +125,83 @@ void bench_make_shared() {
     }
 }
 
+void bench_std_shared_ptr_alloc() {
+    for (int i = 0; i < N; ++i) {
+        std::shared_ptr<int> p(new int(i));
+        sink += *p;
+    }
+}
+
+void bench_std_make_shared() {
+    for (int i = 0; i < N; ++i) {
+        auto p = std::make_shared<int>(i);
+        sink += *p;
+    }
+}
+
+void bench_custom_shared_ptr_alloc() {
+    for (int i = 0; i < N; ++i) {
+        sp::shared_ptr<int> p(new int(i));
+        sink += *p;
+    }
+}
+
+void bench_custom_make_shared() {
+    for (int i = 0; i < N; ++i) {
+        auto p = sp::make_shared<int>(i);
+        sink += *p;
+    }
+}
+
+void bench_custom_allocate_shared() {
+    std::allocator<int> alloc;
+
+    for (int i = 0; i < N; ++i) {
+        auto p = sp::allocate_shared<int>(alloc, i);
+        sink += *p;
+    }
+}
+
+void bench_allocate_shared_custom_allocator() {
+    using Alloc = CountingAllocator<int>;
+
+    CountingAllocatorStats::allocs = 0;
+    CountingAllocatorStats::deallocs = 0;
+
+    for (int i = 0; i < N; ++i) {
+        auto p = sp::allocate_shared<int>(Alloc{}, i);
+        sink += *p;
+    }
+
+    std::cout << "Alloc calls: " << CountingAllocatorStats::allocs << "\n";
+    std::cout << "Dealloc calls: " << CountingAllocatorStats::deallocs << "\n";
+}
+
+void bench_destruction() {
+    std::vector<sp::shared_ptr<int>> vec;
+    vec.reserve(N);
+
+    for (int i = 0; i < N; ++i) {
+        vec.push_back(sp::make_shared<int>(i));
+    }
+
+    auto start = Clock::now();
+    vec.clear();  // triggers destruction
+    auto end = Clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "Destruction: " << duration << " us\n";
+}
+
 int main() {
     std::cout << "=== shared_ptr Benchmark ===\n\n";
 
-    std::cout << "--- Allocation ---\n";
-    benchmark("std::shared_ptr alloc", bench_std_alloc, N);
-    benchmark("custom shared_ptr alloc", bench_custom_alloc, N);
-    benchmark("custom make_shared shared_ptr alloc", bench_make_shared, 1);
+    std::cout << "--- Allocation (2 alloc vs 1 alloc) ---\n";
+    benchmark("std::shared_ptr (new)", bench_std_shared_ptr_alloc, N);
+    benchmark("std::make_shared", bench_std_make_shared, N);
+    benchmark("custom shared_ptr (new)", bench_custom_shared_ptr_alloc, N);
+    benchmark("custom make_shared", bench_custom_make_shared, N);
+    benchmark("custom allocate_shared", bench_custom_allocate_shared, N);
 
     std::cout << "\n--- Copy (atomic inc/dec) ---\n";
     benchmark("std::shared_ptr copy", bench_std_copy, N);
@@ -143,6 +214,12 @@ int main() {
     std::cout << "\n--- Reset ---\n";
     benchmark("std::shared_ptr reset", bench_std_reset, N);
     benchmark("custom shared_ptr reset", bench_custom_reset, N);
+
+    std::cout << "\n--- Custom Allocator (allocate_shared) ---\n";
+    benchmark("sp::allocated_shared with custom allocator", bench_allocate_shared_custom_allocator, N);
+
+    std::cout << "\n--- Destruction ---\n";
+    benchmark("sp::shared_ptr destruction benchmark", bench_destruction, N);
 
     std::cout << "\n--- Multithreaded Contention ---\n";
     benchmark("std::shared_ptr threaded", bench_std_threaded, THREADS * THREAD_ITERS);

@@ -17,6 +17,9 @@ namespace sp {
         template<typename U, typename... Args>
         friend shared_ptr<U> make_shared(Args&&...);
 
+        template<typename U, typename Alloc, typename... Args>
+        friend shared_ptr<U> allocate_shared(const Alloc& alloc, Args&&... args);
+
     public:
         shared_ptr() noexcept = default;
 

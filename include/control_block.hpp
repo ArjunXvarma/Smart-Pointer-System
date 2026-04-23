@@ -74,7 +74,37 @@ struct inplace_control_block : control_block_base {
     }
 
     void delete_self() noexcept override {
+        // Using operator delete is DIFFERENT from delete, operator delete deallocates memory without calling destructor
         operator delete(this); // Performs raw deletion of memory without calling destructor
+    }
+};
+
+template<typename T, typename Alloc>
+struct inplace_control_block_alloc : control_block_base {
+    using AllocTraits = std::allocator_traits<Alloc>;
+
+    alignas(T) unsigned char storage[sizeof(T)];
+    Alloc alloc;
+
+    template<typename... Args>
+    inplace_control_block_alloc(const Alloc& a, Args&&... args) : alloc(a) {
+        new (storage) T(std::forward<Args>(args)...); // Allocate object T inside storage
+    }
+
+    T* get() {
+        return reinterpret_cast<T*>(&storage); // Low level cast, convert raw memory to type T*
+    }
+
+    void destroy_object() noexcept override {
+        get()->~T(); // Manual destructor call
+    }
+
+    void delete_self() noexcept override {
+        using CBAlloc = AllocTraits::template rebind_alloc<inplace_control_block_alloc>;
+
+        CBAlloc cb_alloc(alloc);
+
+        std::allocator_traits<CBAlloc>::deallocate(cb_alloc, this, 1);
     }
 };
 

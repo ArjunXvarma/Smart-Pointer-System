@@ -25,3 +25,29 @@ void benchmark_multi_thread(const std::string& name, Func&& func, int N) {
               << ": " << duration << " us"
               << " (" << ns_per_op << " ns/op)\n";
 }
+
+struct CountingAllocatorStats {
+    static inline int allocs = 0;
+    static inline int deallocs = 0;
+};
+
+template<typename T>
+struct CountingAllocator {
+    using value_type = T;
+
+    CountingAllocator() = default;
+
+    // REQUIRED for rebind
+    template<typename U>
+    CountingAllocator(const CountingAllocator<U>&) {}
+
+    T* allocate(std::size_t n) {
+        CountingAllocatorStats::allocs++;
+        return std::allocator<T>{}.allocate(n);
+    }
+
+    void deallocate(T* p, std::size_t n) {
+        CountingAllocatorStats::deallocs++;
+        std::allocator<T>{}.deallocate(p, n);
+    }
+};

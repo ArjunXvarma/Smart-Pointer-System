@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../include/make_shared.hpp"
+#include "../include/allocate_shared.hpp"
 #include "utils.hpp"
 
 using namespace sp;
@@ -204,6 +205,34 @@ void test_make_shared_destruction() {
     assert(Counter::destructions == 1);
 }
 
+void test_allocate_shared_basic() {
+    std::allocator<int> alloc;
+
+    auto sp = sp::allocate_shared<int>(alloc, 42);
+
+    assert(*sp == 42);
+    assert(sp.use_count() == 1);
+}
+
+void test_allocate_shared_copy() {
+    std::allocator<int> alloc;
+
+    auto sp1 = sp::allocate_shared<int>(alloc, 42);
+    auto sp2 = sp1;
+
+    assert(sp1.use_count() == 2);
+}
+
+void test_custom_allocator() {
+    using Alloc = CountingAllocator<int>;
+
+    {
+        auto sp = sp::allocate_shared<int>(Alloc(), 42);
+    }
+
+    assert(Alloc::allocs == Alloc::deallocs);
+}
+
 int main() {
     RUN_TEST(test_control_block);
     RUN_TEST(test_basic);
@@ -223,6 +252,9 @@ int main() {
     RUN_TEST(test_make_shared_basic);
     RUN_TEST(test_make_shared_copy);
     RUN_TEST(test_make_shared_destruction);
+    RUN_TEST(test_allocate_shared_basic);
+    RUN_TEST(test_allocate_shared_copy);
+    RUN_TEST(test_custom_allocator);
 
     std::cout << "All shared_ptr tests passed\n";
 
